@@ -1,0 +1,79 @@
+package com.tecsup.demoSeguridad01.util;
+
+import com.tecsup.demoSeguridad01.model.Role;
+import com.tecsup.demoSeguridad01.model.User;
+import com.tecsup.demoSeguridad01.repository.RoleRepository;
+import com.tecsup.demoSeguridad01.repository.UserRepository;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Set;
+
+@Configuration
+public class DataLoader {
+
+    @Bean
+    CommandLineRunner initData(
+            UserRepository userRepo,
+            RoleRepository roleRepo,
+            PasswordEncoder encoder) {
+
+        return args -> {
+
+            // Crear ROLE_USER si no existe
+            Role roleUser = roleRepo.findByName("ROLE_USER")
+                    .orElseGet(() -> {
+                        Role r = new Role();
+                        r.setName("ROLE_USER");
+                        return roleRepo.save(r);
+                    });
+
+            // Crear ROLE_ADMIN si no existe
+            Role roleAdmin = roleRepo.findByName("ROLE_ADMIN")
+                    .orElseGet(() -> {
+                        Role r = new Role();
+                        r.setName("ROLE_ADMIN");
+                        return roleRepo.save(r);
+                    });
+
+            // Crear ROLE_MANAGER si no existe
+            Role roleManager = roleRepo.findByName("ROLE_MANAGER")
+                    .orElseGet(() -> {
+                        Role r = new Role();
+                        r.setName("ROLE_MANAGER");
+                        return roleRepo.save(r);
+                    });
+
+            // Crear usuario USER
+            if (userRepo.findByUsername("user").isEmpty()) {
+                User user = new User();
+                user.setUsername("user");
+                user.setPassword(encoder.encode("user2026"));
+                user.setRoles(Set.of(roleUser));
+                userRepo.save(user);
+            }
+
+            // Crear usuario ADMIN
+            if (userRepo.findByUsername("admin").isEmpty()) {
+                User admin = new User();
+                admin.setUsername("admin");
+                admin.setPassword(encoder.encode("admin2026"));
+                admin.setRoles(Set.of(roleAdmin));
+                userRepo.save(admin);
+            }
+
+            // Crear usuario MANAGER
+            if (userRepo.findByUsername("manager").isEmpty()) {
+                User manager = new User();
+                manager.setUsername("manager");
+                manager.setPassword(encoder.encode("manager2026"));
+                manager.setRoles(Set.of(roleManager));
+                userRepo.save(manager);
+            }
+
+            System.out.println("Datos iniciales cargados correctamente");
+        };
+    }
+}
